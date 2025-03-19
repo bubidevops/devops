@@ -18,7 +18,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'dockerconfig', variable: 'DOCKER_CONFIG_FILE')]) {
+                    withCredentials([file(credentialsId: 'ecr-secret', variable: 'DOCKER_CONFIG_FILE')]) {
                         sh '''
                             mkdir -p $HOME/.docker
                             cp $DOCKER_CONFIG_FILE $HOME/.docker/config.json
