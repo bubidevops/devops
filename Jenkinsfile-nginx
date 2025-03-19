@@ -15,23 +15,13 @@ pipeline {
                 git branch: 'nginx', credentialsId: 'gitsecret', url: 'https://github.com/bubidevops/apps.git'
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:latest .'
-            }
-        }
-        stage('Docker Login') {
-            steps {
-                docker.withRegistry("$DOCKER_REGISTRY", 'ecrsecret') {
-                sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
-}
-
-            }
-        }    
-        stage('Push to Registry') {
-            steps {
-                withDockerRegistry([credentialsId: 'ecrsecret', url: "$DOCKER_REGISTRY"]) {
-                    sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+                script {
+                    sh "docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:latest ."
+                    docker.withRegistry("https://$DOCKER_REGISTRY", 'ecrsecret') {
+                        sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+                    }
                 }
             }
         }
