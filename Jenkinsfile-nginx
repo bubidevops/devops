@@ -18,9 +18,13 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    sh "docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:latest ."
-                    docker.withRegistry("https://$DOCKER_REGISTRY", 'ecrsecret') {
-                        sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+                    withCredentials([file(credentialsId: 'dockerconfig', variable: 'DOCKER_CONFIG_FILE')]) {
+                        sh '''
+                            mkdir -p $HOME/.docker
+                            cp $DOCKER_CONFIG_FILE $HOME/.docker/config.json
+                            docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:latest .
+                            docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest
+                        '''
                     }
                 }
             }
