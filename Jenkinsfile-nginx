@@ -22,7 +22,10 @@ pipeline {
         }
         stage('Docker Login') {
             steps {
-                sh 'echo "dop_v1_12d8dbb6c3e562bb95b44972760a6a669dfaae285ec855bae1cbccbea02a561b" | docker login registry.digitalocean.com -u "cemre@hostingusta.com" --password-stdin'
+                docker.withRegistry("$DOCKER_REGISTRY", 'ecrsecret') {
+                sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+}
+
             }
         }    
         stage('Push to Registry') {
