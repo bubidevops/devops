@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_REGISTRY = "registry.digitalocean.com/devopsrepo"
+        IMAGE_NAME = "nginx-hello-world"
+    }
+    stages {
+        stage('Cleanup') {
+            steps {
+                cleanWs()  // Önceki build dosyalarını temizle
+            }
+        }
+        stage('Checkout') {
+            steps {
+                git branch: 'nginx', credentialsId: 'gitsecret', url: 'https://github.com/bubidevops/apps.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:latest .'
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                sh 'echo "dop_v1_12d8dbb6c3e562bb95b44972760a6a669dfaae285ec855bae1cbccbea02a561b" | docker login registry.digitalocean.com -u "cemre@hostingusta.com" --password-stdin'
+            }
+        }    
+        stage('Push to Registry') {
+            steps {
+                withDockerRegistry([credentialsId: 'ecrsecret', url: "$DOCKER_REGISTRY"]) {
+                    sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker system prune -f'
+        }
+    }
+}
