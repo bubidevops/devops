@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Cleanup') {
             steps {
-                cleanWs()  // Önceki build dosyalarını temizle
+                cleanWs()  
             }
         }
         stage('Checkout') {
